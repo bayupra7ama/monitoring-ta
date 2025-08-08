@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "456606035578",
+    "project_id": "monitoring-ta-z",
+    "storage_bucket": "monitoring-ta-z.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:456606035578:android:4cdf15eef32679b5fed5c3",
+        "android_client_info": {
+          "package_name": "com.tugas.layout"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBBnWcbY3Trl5iDC80XIbG2IuKdP3NkqWs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
