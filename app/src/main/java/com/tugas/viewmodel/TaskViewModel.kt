@@ -6,6 +6,7 @@ import android.widget.Toast
 import androidx.compose.runtime.mutableStateOf
 import androidx.core.net.toFile
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.tugas.data.api.RetrofitInstance
 import com.tugas.data.model.ProgressReport
 import com.tugas.data.model.ResponseWrapper
@@ -19,6 +20,7 @@ import com.tugas.data.repository.TaskRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
@@ -36,6 +38,9 @@ class TaskViewModel : ViewModel() {
     val isLoading = mutableStateOf(false)
     val taskResponse = mutableStateOf<TaskData?>(null)
     val errorMessage = mutableStateOf<String?>(null)
+
+    private val _isUploading = MutableStateFlow(false)
+    val isUploading = _isUploading.asStateFlow()
 
     private val _taskDetail = MutableStateFlow<TaskDetailResponse?>(null)
     val taskDetail = _taskDetail.asStateFlow()
@@ -129,15 +134,14 @@ class TaskViewModel : ViewModel() {
         })
     }
 
+
     suspend fun uploadProgressReport(token: String, taskId: Int, uri: Uri, context: Context) {
-        isUpdatingSubtask.value = true
+        if (_isUploading.value) return
+        _isUploading.value = true
 
         try {
-            // salin ke file sementara
             val inputStream = context.contentResolver.openInputStream(uri)
-            val tempFile = withContext(Dispatchers.IO) {
-                File.createTempFile("upload_", ".pdf", context.cacheDir)
-            }
+            val tempFile = File.createTempFile("upload_", ".pdf", context.cacheDir)
             tempFile.outputStream().use { fileOut ->
                 inputStream?.copyTo(fileOut)
             }
@@ -145,26 +149,18 @@ class TaskViewModel : ViewModel() {
             val requestFile = tempFile.asRequestBody("application/pdf".toMediaTypeOrNull())
             val body = MultipartBody.Part.createFormData("file", tempFile.name, requestFile)
 
-            RetrofitInstance.api.uploadProgressReport(taskId, body, "Bearer $token")
-                .enqueue(object : Callback<ResponseWrapper<ProgressReport>> {
-                    override fun onResponse(call: Call<ResponseWrapper<ProgressReport>>, response: Response<ResponseWrapper<ProgressReport>>) {
-                        isUpdatingSubtask.value = false
-                        if (response.isSuccessful) {
-                            Toast.makeText(context, "Upload sukses", Toast.LENGTH_SHORT).show()
-                        } else {
-                            Toast.makeText(context, "Upload gagal", Toast.LENGTH_SHORT).show()
-                        }
-                    }
+            // ✅ langsung call API (karena sudah suspend)
+            val response = RetrofitInstance.api.uploadProgressReport(taskId, body, "Bearer $token")
 
-                    override fun onFailure(call: Call<ResponseWrapper<ProgressReport>>, t: Throwable) {
-                        isUpdatingSubtask.value = false
-                        Toast.makeText(context, "Error: ${t.message}", Toast.LENGTH_SHORT).show()
-                    }
-                })
-
+            _isUploading.value = false
+            if (response.isSuccessful) {
+                Toast.makeText(context, "Upload sukses", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(context, "Upload gagal: ${response.errorBody()?.string()}", Toast.LENGTH_SHORT).show()
+            }
         } catch (e: Exception) {
-            isUpdatingSubtask.value = false
-            Toast.makeText(context, "Gagal membaca file: ${e.message}", Toast.LENGTH_SHORT).show()
+            _isUploading.value = false
+            Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
         }
     }
 

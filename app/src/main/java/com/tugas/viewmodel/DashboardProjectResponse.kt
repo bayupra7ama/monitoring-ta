@@ -1,22 +1,14 @@
 package com.tugas.viewmodel
 
+import com.tugas.data.model.ProjectWithTasks
+
 
 data class DashboardProjectResponse(
     val project: ProjectWithTasks,
     val burndown: BurndownData
 )
 
-data class ProjectWithTasks(
-    val id: Int,
-    val user_id: Int,
-    val title: String,
-    val description: String,
-    val start_date: String,
-    val end_date: String,
-    val created_at: String,
-    val updated_at: String,
-    val tasks: List<TaskWithSubtasks>
-)
+
 
 data class TaskWithSubtasks(
     val id: Int,
@@ -41,5 +33,7 @@ data class SubTask(
 
 data class BurndownData(
     val labels: List<String>,
-    val actual: List<Int>
+    val actual: List<Int>,
+    val ideal: List<Int>   // 🔥 tambahin ini biar cocok sama response Laravel
+
 )

@@ -1,5 +1,7 @@
 [versions]
+accompanistWebview = "0.30.1"
 agp = "8.6.0"
+androidPdfViewer = "3.2.0-beta.1"
 converterGson = "2.9.0"
 kotlin = "1.9.0"
 coreKtx = "1.16.0"
@@ -21,6 +23,8 @@ googleGmsGoogleServices = "4.4.3"
 firebaseMessaging = "25.0.0"
 
 [libraries]
+accompanist-webview = { module = "com.google.accompanist:accompanist-webview", version.ref = "accompanistWebview" }
+android-pdf-viewer = { module = "com.github.barteksc:android-pdf-viewer", version.ref = "androidPdfViewer" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-material = { module = "androidx.compose.material:material", version.ref = "material" }
 androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose" }

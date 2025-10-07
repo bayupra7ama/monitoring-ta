@@ -60,12 +60,22 @@ class NotificationViewModel(
     fun markAsRead(token: String, notificationId: String) {
         viewModelScope.launch {
             try {
+                // langsung update state dulu (optimistic)
+                val updatedList = _notifications.value.map { notif ->
+                    if (notif.id == notificationId) {
+                        notif.copy(readAt = "just_now")
+                    } else notif
+                }
+                _notifications.value = updatedList
+
+                // kirim request ke server
                 repository.markNotificationAsRead(token, notificationId)
             } catch (e: Exception) {
                 Log.e("NotificationViewModel", "Mark as read failed: ${e.message}")
             }
         }
     }
+
 
     fun setNotifications(updated: List<NotificationItem>) {
         _notifications.value = updated

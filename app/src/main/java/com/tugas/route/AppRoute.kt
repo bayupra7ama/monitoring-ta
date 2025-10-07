@@ -9,5 +9,7 @@ object AppRoute {
     const val ADD_PROJECT = "add_project"
     const val HOME = "home"
     const val DOSENHOME = "dosen_home"
+    const val SPLASH = "splash" // <-- TAMBAHKAN INI
+
 }
 

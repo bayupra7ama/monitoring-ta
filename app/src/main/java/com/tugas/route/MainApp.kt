@@ -1,5 +1,9 @@
 package com.tugas.route
 
+import com.tugas.layout.ui.auth.RegisterScreen
+import android.net.Uri
+import android.os.Build
+import androidx.annotation.RequiresApi
 import com.tugas.layout.ui.mahasiswa.AddProjectScreen
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -27,10 +31,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.tugas.data.repository.UserPreferences
 import com.tugas.layout.ui.dosen.NotificationScreen
 import com.tugas.layout.ui.mahasiswa.AddTaskScreen
@@ -38,17 +45,19 @@ import com.tugas.layout.ui.mahasiswa.DashboardScreen
 import com.tugas.layout.ui.auth.LoginScreen
 import com.tugas.layout.ui.mahasiswa.ProfileScreen
 import com.tugas.layout.ui.mahasiswa.ProjectListScreen
-import com.tugas.layout.ui.auth.RegisterScreen
 import com.tugas.layout.ui.mahasiswa.TaskDetailScreen
 import com.tugas.layout.navigasi.BottomNavItem
 import com.tugas.layout.ui.dosen.DosenDashboardScreen
 import com.tugas.layout.ui.dosen.DosenProgressReportScreen
+import com.tugas.layout.ui.document.PdfViewerScreen
 import com.tugas.layout.ui.dosen.ReportDetailScreen
 import com.tugas.layout.ui.mahasiswa.ProgressReportScreen
+import com.tugas.layout.ui.splashscreen.SplashScreen
 import com.tugas.viewmodel.UserViewModel
 import kotlinx.coroutines.launch
 
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun MainApp() {
     val navController = rememberNavController()
@@ -63,14 +72,12 @@ fun MainApp() {
             BottomNavItem(AppRoute.HOME, "Home", Icons.Default.Home),
             BottomNavItem("progress", "Progress", Icons.Default.DateRange),
             BottomNavItem("profile", "Profil", Icons.Default.Person),
-                    BottomNavItem("notifications", "Notifikasi", Icons.Default.Notifications)
 
         )
         "dosen" -> listOf(
             BottomNavItem(AppRoute.DOSENHOME, "Dashboard", Icons.Default.Home),
             BottomNavItem("dosen_reports", "Laporan", Icons.Default.Description),
             BottomNavItem("profile", "Profil", Icons.Default.Person),
-            BottomNavItem("notifications", "Notifikasi", Icons.Default.Notifications)
 
         )
         else -> emptyList()
@@ -78,7 +85,7 @@ fun MainApp() {
 
     val currentBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = currentBackStackEntry?.destination?.route
-    val showBottomBar = currentRoute !in listOf(AppRoute.LOGIN, AppRoute.REGISTER)
+    val showBottomBar = currentRoute !in listOf(AppRoute.LOGIN, AppRoute.REGISTER, AppRoute.SPLASH)
 
     Scaffold(
         bottomBar = {
@@ -108,14 +115,34 @@ fun MainApp() {
     ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = if (isLoggedIn) {
-                if (role == "mahasiswa") AppRoute.HOME else AppRoute.DOSENHOME
-            } else {
-                AppRoute.LOGIN
-            },
+            startDestination = AppRoute.SPLASH, // <-- UBAH MENJADI INI
             modifier = Modifier.padding(innerPadding)
         ) {
+
             // Auth
+
+            composable(AppRoute.SPLASH) {
+                SplashScreen(
+                    onNavigateToLogin = {
+                        navController.navigate(AppRoute.LOGIN) {
+                            // Hapus splash screen dari back stack
+                            popUpTo(AppRoute.SPLASH) { inclusive = true }
+                        }
+                    },
+                    onNavigateToHome = { userRole ->
+                        val destination = when (userRole) {
+                            "mahasiswa" -> AppRoute.HOME
+                            "dosen" -> AppRoute.DOSENHOME
+                            else -> AppRoute.LOGIN // Fallback
+                        }
+                        navController.navigate(destination) {
+                            // Hapus splash screen dari back stack
+                            popUpTo(AppRoute.SPLASH) { inclusive = true }
+                        }
+                    }
+                )
+            }
+
             composable(AppRoute.LOGIN) {
                 LoginScreen(
                     onLoginClick = { token, user ->
@@ -147,6 +174,11 @@ fun MainApp() {
                             popUpTo(AppRoute.REGISTER) { inclusive = true }
                             launchSingleTop = true
                         }
+                    },
+                    onLoginNavigate = {
+
+                        navController.popBackStack() // Ini akan menghapus RegisterScreen dari back stack dan kembali ke screen sebelumnya
+
                     }
                 )
             }
@@ -155,11 +187,18 @@ fun MainApp() {
             composable(AppRoute.HOME) {
                 ProjectListScreen(
                     onProjectClick = { navController.navigate("projects/${it.id}") },
-                    onAddProjectClick = { navController.navigate(AppRoute.ADD_PROJECT) }
+                    onAddProjectClick = { navController.navigate(AppRoute.ADD_PROJECT) },
+                     onNavigateToNotifications = {navController.navigate("notifications")
+                     }
                 )
             }
 
-            composable("progress") { ProgressReportScreen() }
+            composable("progress") {
+                ProgressReportScreen(
+                    onBackClick = { navController.navigate(AppRoute.HOME)},
+                    navController = navController
+                )
+            }
 
             composable("profile") {
                 val context = LocalContext.current
@@ -218,7 +257,7 @@ fun MainApp() {
 
 
             composable(AppRoute.ADD_PROJECT) {
-                AddProjectScreen(onSubmit = { navController.popBackStack() })
+                AddProjectScreen(onSubmit = { navController.popBackStack() }, navController = navController,)
             }
 
             composable("projects/{projectId}") { backStackEntry ->
@@ -229,9 +268,12 @@ fun MainApp() {
                         onAddTaskClick = { navController.navigate("add_task/$projectId") },
                         onTaskClick = { taskId ->
                             navController.navigate("tasks/$taskId/detail")
-                        }
-                    )
+                        },
+                        onNavigateToNotifications = {
+                            navController.navigate("notifications")
+                        })
                 }
+
             }
 
             composable("add_task/{projectId}") { backStackEntry ->
@@ -239,7 +281,8 @@ fun MainApp() {
                 if (projectId != null) {
                     AddTaskScreen(
                         projectId = projectId,
-                        onSubmit = { navController.popBackStack() }
+                        onSubmit = { navController.popBackStack() },
+                        navController = navController
                     )
                 }
             }
@@ -247,7 +290,11 @@ fun MainApp() {
             composable("tasks/{taskId}/detail") { backStackEntry ->
                 val taskId = backStackEntry.arguments?.getString("taskId")?.toIntOrNull()
                 if (taskId != null) {
-                    TaskDetailScreen(taskId = taskId)
+                    TaskDetailScreen(
+                        taskId = taskId,
+                        navController = navController,
+                        onBackClick = { navController.popBackStack() } // ✅ balik ke halaman sebelumnya
+                    )
                 }
             }
 
@@ -263,24 +310,40 @@ fun MainApp() {
 
 
 
-            composable("dosen_reports") { DosenProgressReportScreen() }
+            composable("dosen_reports") { DosenProgressReportScreen(navController = navController,                    onBackClick = { navController.navigate(AppRoute.HOME)},
+            ) }
 
 
 
             composable("report_detail/{reportId}") { backStackEntry ->
                 val reportId = backStackEntry.arguments?.getString("reportId")?.toIntOrNull()
                 reportId?.let {
-                    ReportDetailScreen(reportId = it)
+                    ReportDetailScreen(reportId = it, navController = navController, onBackClick = { navController.popBackStack() }) // ✅ kirim navController
                 }
             }
+
 
             composable("notifications") {
                 NotificationScreen(
                     onNavigateToReportDetail = { reportId ->
                         navController.navigate("report_detail/$reportId")
                     }
+                    , navController = navController
                 )
             }
+
+            composable(route = "pdf_viewer/{fileUrl}",
+                arguments = listOf(navArgument("fileUrl") { type = NavType.StringType })
+            ) { backStackEntry ->
+                val fileUrl = backStackEntry.arguments?.getString("fileUrl") ?: ""
+                PdfViewerScreen(
+                    fileUrl = Uri.decode(fileUrl),
+                    navController = navController
+                )
+            }
+
+
+
 
 
         }

@@ -22,6 +22,9 @@ class ProjectViewModel : ViewModel() {
     private val _createResult = MutableStateFlow<Project?>(null)
     val createResult: StateFlow<Project?> = _createResult
 
+    private val _errorMessage = MutableStateFlow<String?>(null)
+    val errorMessage: StateFlow<String?> = _errorMessage
+
     fun fetchProjects(token: String) {
         viewModelScope.launch {
             try {
@@ -30,6 +33,8 @@ class ProjectViewModel : ViewModel() {
                 _projects.value = response.data
             } catch (e: Exception) {
                 e.printStackTrace()
+                _errorMessage.value = e.message ?: "Gagal memuat data proyek"
+
             } finally {
                 _isLoading.value = false
             }
@@ -39,10 +44,16 @@ class ProjectViewModel : ViewModel() {
     fun createProject(token: String, request: AddProjectRequest) {
         viewModelScope.launch {
             try {
+                _isLoading.value = true
+
                 val newProject = repository.createProject(token, request)
                 _createResult.value = newProject
             } catch (e: Exception) {
+                _errorMessage.value = e.message ?: "Gagal menambahkan proyek"
+
                 Log.e("ProjectVM", "Create Failed", e)
+            }finally {
+                _isLoading.value = false
             }
         }
     }

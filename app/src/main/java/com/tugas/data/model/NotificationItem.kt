@@ -1,21 +1,23 @@
 package com.tugas.data.model
 
+import com.google.gson.annotations.SerializedName
+
 data class NotificationItem(
-    val id: String,
-    val type: String,
-    val notifiableType: String,
-    val notifiableId: Int,
-    val data: NotificationData,
-    val readAt: String?,
-    val createdAt: String,
-    val updatedAt: String
+    @SerializedName("id") val id: String,
+    @SerializedName("type") val type: String,
+    @SerializedName("notifiable_type") val notifiableType: String,
+    @SerializedName("notifiable_id") val notifiableId: Int,
+    @SerializedName("data") val data: NotificationData,
+    @SerializedName("read_at") val readAt: String?,   // ✅ WAJIB ada
+    @SerializedName("created_at") val createdAt: String,
+    @SerializedName("updated_at") val updatedAt: String
 )
 
 data class NotificationData(
-    val title: String,
-    val message: String,
-    val status: String,
-    val created_at: String,
-    val report_id: Int? = null, // atau val task_id: Int? jika lebih relevan
-
+    @SerializedName("title") val title: String,
+    @SerializedName("message") val message: String,
+    @SerializedName("status") val status: String,
+    @SerializedName("report_id") val reportId: Int,
+    @SerializedName("created_at") val createdAt: String
 )
+

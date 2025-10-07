@@ -96,7 +96,7 @@ interface AuthApiService {
         @Path("taskId") taskId: Int,
         @Part file: MultipartBody.Part,
         @Header("Authorization") token: String
-    ): Call<ResponseWrapper<ProgressReport>>
+    ): Response<ResponseWrapper<ProgressReport>>
 
     @GET("api/my-reports")
     suspend fun getMyReports(

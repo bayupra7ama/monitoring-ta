@@ -93,6 +93,8 @@ dependencies {
     implementation("io.github.grizzi91:bouquet:1.1.2")
     implementation ("androidx.compose.material:material-icons-extended:1.6.1")
     implementation("io.coil-kt:coil-compose:2.4.0")
+    implementation("io.coil-kt:coil-svg:2.4.0") // Versi Coil SVG terbaru
+
 
     // Hilt
     implementation("com.google.dagger:hilt-android:2.51.1")
@@ -101,6 +103,9 @@ dependencies {
 // ViewModel Compose support
     implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
 
+    implementation (libs.accompanist.webview)
+
+    implementation("com.github.pratikksahu:JetPDFVue:1.0.7")
 
 
 
