@@ -67,16 +67,14 @@ fun RegisterScreen(
     var roleExpanded by remember { mutableStateOf(false) }
 
     // Data dummy untuk Jurusan dan Program Studi
-    val jurusanOptions = listOf("Teknik Informatika", "Sistem Informasi", "Manajemen", "Akuntansi")
+    val jurusanOptions = listOf("Teknik Informatika",)
     var selectedJurusan by remember { mutableStateOf("") }
     var jurusanExpanded by remember { mutableStateOf(false) }
 
     // Contoh prodi berdasarkan jurusan. Anda bisa membuat logika yang lebih kompleks.
     val prodiOptionsMap = mapOf(
-        "Teknik Informatika" to listOf("S1 Teknik Informatika", "D3 Teknik Komputer"),
-        "Sistem Informasi" to listOf("S1 Sistem Informasi", "D3 Manajemen Informatika"),
-        "Manajemen" to listOf("S1 Manajemen", "D3 Manajemen Bisnis"),
-        "Akuntansi" to listOf("S1 Akuntansi", "D3 Perpajakan")
+        "Teknik Informatika" to listOf("D4 Rekayasa PRangkat Lunak", "D3 Teknik Informatika", "D4 Keamanan Sistem Infomasi", "D2 Administrasi Jaringan Komputer"),
+
     )
     var selectedProdi by remember { mutableStateOf("") }
     var prodiExpanded by remember { mutableStateOf(false) }
