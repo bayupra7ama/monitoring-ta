@@ -131,7 +131,10 @@ fun ReportDetailScreen(reportId: Int, navController: NavController, onBackClick:
                             Column(modifier = Modifier.padding(16.dp)) {
                                 InfoRow(label = "Mahasiswa", value = rpt.user.name)
                                 Spacer(Modifier.height(12.dp))
-                                InfoRow(label = "Judul Tugas", value = rpt.task.title)
+                                InfoRow(label = "Judul Tugas", value = rpt.subtask?.task?.title.toString()?: "-")
+                                InfoRow(label = "Judul Subtugas", value = rpt.subtask?.title ?: "-")
+
+
                                 Spacer(Modifier.height(12.dp))
                                 StatusRow(label = "Status", value = rpt.statusValidasi)
 
@@ -156,33 +159,7 @@ fun ReportDetailScreen(reportId: Int, navController: NavController, onBackClick:
                             }
                         }
 
-                        // --- KARTU SUBTUGAS ---
-                        if (rpt.task.subtasks.isNotEmpty()) {
-                            Card(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 8.dp),
-                                shape = RoundedCornerShape(12.dp),
-                                elevation = CardDefaults.cardElevation(4.dp),
-                                colors = CardDefaults.cardColors(containerColor = Color.White)
-                            ) {
-                                Column(modifier = Modifier.padding(16.dp)) {
-                                    Text(
-                                        text = "Daftar Subtugas",
-                                        fontSize = 16.sp,
-                                        fontWeight = FontWeight.SemiBold,
-                                        color = GrayDark
-                                    )
-                                    Spacer(Modifier.height(8.dp))
-                                    rpt.task.subtasks.forEachIndexed { index, subtask ->
-                                        SubtaskItem(subtask = subtask)
-                                        if (index < rpt.task.subtasks.lastIndex) {
-                                            HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
-                                        }
-                                    }
-                                }
-                            }
-                        }
+
 
                         // --- TOMBOL AKSI ---
                         Row(
@@ -221,33 +198,6 @@ fun ReportDetailScreen(reportId: Int, navController: NavController, onBackClick:
     }
 }
 
-@Composable
-fun SubtaskItem(subtask: SubTask) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        Text(
-            text = subtask.title,
-            modifier = Modifier.weight(1f),
-            color = GrayDark,
-            fontSize = 14.sp
-        )
-        Spacer(Modifier.width(16.dp))
-        val statusColor = when (subtask.status.lowercase()) {
-            "selesai" -> GreenPrimary
-            "proses" -> Color(0xFFFFA726)
-            else -> GraySecondary
-        }
-        Text(
-            text = subtask.status.uppercase(),
-            color = statusColor,
-            fontWeight = FontWeight.Bold,
-            fontSize = 12.sp
-        )
-    }
-}
 
 @Composable
 fun InfoRow(label: String, value: String) {
@@ -296,3 +246,33 @@ fun ActionButton(
         }
     }
 }
+
+//
+//@Composable
+//fun SubtaskItem(subtask: SubTask) {
+//    Row(
+//        modifier = Modifier.fillMaxWidth(),
+//        verticalAlignment = Alignment.CenterVertically,
+//        horizontalArrangement = Arrangement.SpaceBetween
+//    ) {
+//        Text(
+//            text = subtask.title,
+//            modifier = Modifier.weight(1f),
+//            color = GrayDark,
+//            fontSize = 14.sp
+//        )
+//        Spacer(Modifier.width(16.dp))
+//        val statusColor = when (subtask.status.lowercase()) {
+//            "selesai" -> GreenPrimary
+//            "proses" -> Color(0xFFFFA726)
+//            else -> GraySecondary
+//        }
+//        Text(
+//            text = subtask.status.uppercase(),
+//            color = statusColor,
+//            fontWeight = FontWeight.Bold,
+//            fontSize = 12.sp
+//        )
+//    }
+//}
+

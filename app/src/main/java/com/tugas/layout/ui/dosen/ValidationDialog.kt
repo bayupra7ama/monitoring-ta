@@ -36,115 +36,69 @@ import com.tugas.layout.ui.theme.GreenPrimary
 import com.tugas.layout.ui.theme.GraySecondary
 import com.tugas.layout.ui.theme.GrayDark
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ValidationDialog(
     onDismiss: () -> Unit,
     onSubmit: (String, String?) -> Unit
 ) {
-    var status by remember { mutableStateOf("ditolak") } // <--- PERBAIKAN DI SINI
+    var status by remember { mutableStateOf("revisi") } // default
     var feedback by remember { mutableStateOf("") }
 
     AlertDialog(
         onDismissRequest = onDismiss,
         confirmButton = {
-            TextButton(onClick = {
-                onSubmit(status, feedback.ifBlank { null })
-            }) {
-                Text(
-                    "Kirim",
-                    color = GreenPrimary,
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = 16.sp
-                )
+            TextButton(onClick = { onSubmit(status, feedback.ifBlank { null }) }) {
+                Text("Kirim", color = GreenPrimary, fontWeight = FontWeight.SemiBold)
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text(
-                    "Batal",
-                    color = GraySecondary,
-                    fontSize = 16.sp
-                )
+                Text("Batal", color = GraySecondary)
             }
         },
-        title = {
-            Text(
-                "Validasi Laporan",
-                fontWeight = FontWeight.Bold,
-                fontSize = 20.sp,
-                color = GrayDark
-            )
-        },
+        title = { Text("Validasi Laporan", fontWeight = FontWeight.Bold, fontSize = 20.sp) },
         text = {
             Column {
-                Text(
-                    "Pilih Status:",
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = 16.sp,
-                    color = GrayDark
-                )
+                Text("Pilih Status:", fontWeight = FontWeight.SemiBold)
+
                 Spacer(Modifier.height(8.dp))
-                Row(modifier = Modifier.fillMaxWidth()) {
-                    // Ubah ini:
-                    // listOf("disetujui", "ditolak", "revisi").forEach { s ->
-                    // Menjadi ini:
-                    listOf(
-                        Pair("disetujui", "disetujui"),
-                        Pair("ditolak", "ditolak"),
-                    ).forEach { (label, valueToSend) ->
-                        Row(
-                            modifier = Modifier
-                                .weight(1f)
-                                .selectable(
-                                    selected = status == valueToSend, // Pilih berdasarkan nilai yang dikirim
-                                    onClick = { status = valueToSend },
-                                    role = Role.RadioButton
-                                )
-                                .padding(vertical = 4.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            RadioButton(
-                                selected = status == valueToSend,
-                                onClick = null,
-                                colors = RadioButtonDefaults.colors(
-                                    selectedColor = GreenPrimary,
-                                    unselectedColor = GraySecondary
-                                )
+
+                listOf(
+                    "belum" to "Belum",
+                    "revisi" to "Revisi",
+                    "selesai" to "Selesai"
+                ).forEach { (value, label) ->
+                    Row(
+                        modifier = Modifier
+                            .selectable(
+                                selected = status == value,
+                                onClick = { status = value },
+                                role = Role.RadioButton
                             )
-                            Text(
-                                label.replaceFirstChar { it.uppercase() }, // Tampilkan label "Revisi"
-                                color = GrayDark,
-                                fontSize = 15.sp
+                            .padding(vertical = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        RadioButton(
+                            selected = status == value,
+                            onClick = null,
+                            colors = RadioButtonDefaults.colors(
+                                selectedColor = GreenPrimary,
+                                unselectedColor = GraySecondary
                             )
-                        }
+                        )
+                        Text(label, color = GrayDark)
                     }
                 }
+
                 Spacer(Modifier.height(16.dp))
+
                 OutlinedTextField(
                     value = feedback,
                     onValueChange = { feedback = it },
-                    label = {
-                        Text(
-                            "Feedback (opsional)",
-                            color = GraySecondary
-                        )
-                    },
+                    label = { Text("Feedback (opsional)") },
                     modifier = Modifier.fillMaxWidth(),
-                    maxLines = 4,
-                    shape = RoundedCornerShape(10.dp),
-                    colors = OutlinedTextFieldDefaults.colors( // Perubahan di sini!
-                        focusedBorderColor = GreenPrimary,
-                        unfocusedBorderColor = GraySecondary,
-                        cursorColor = GreenPrimary,
-                        // Sekarang gunakan textColor langsung di OutlinedTextField atau di contentColor
-                        // contentColor = GrayDark // Ini akan mengubah warna teks input juga
-                    ),
-                    textStyle = TextStyle(color = GrayDark) // Mengatur warna teks input di sini
                 )
             }
-        },
-        shape = RoundedCornerShape(16.dp),
-        containerColor = Color.White
+        }
     )
 }

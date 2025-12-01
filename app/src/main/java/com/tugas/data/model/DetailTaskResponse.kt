@@ -4,6 +4,8 @@ data class SubTask(
     val id: Int,
     val task_id: Int,
     val title: String,
+    val task: TaskDetailData?,
+
     val status: String
 )
 

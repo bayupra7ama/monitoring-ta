@@ -80,6 +80,7 @@ fun TaskDetailScreen(
     val taskDetail by viewModel.taskDetail.collectAsState()
     val isUpdating by viewModel.isUpdatingSubtask
     val isUploading by viewModel.isUploading.collectAsState()
+    var selectedSubtaskId by remember { mutableStateOf<Int?>(null) }
 
     val coroutineScope = rememberCoroutineScope()
 
@@ -275,6 +276,22 @@ fun TaskDetailScreen(
                         if (taskDetail!!.subtasks.isNotEmpty()) {
                             taskDetail!!.subtasks.forEach { subtask ->
                                 var showStatusDialog by remember { mutableStateOf(false) }
+                                Spacer(Modifier.height(8.dp))
+
+//                                Button(
+//                                    onClick = {
+//                                        selectedSubtaskId = subtask.id
+//                                        launcher.launch("application/pdf")    // buka file picker
+//                                    },
+//                                    modifier = Modifier.fillMaxWidth(),
+//                                    shape = RoundedCornerShape(8.dp),
+//                                    colors = ButtonDefaults.buttonColors(
+//                                        containerColor = GreenPrimary,
+//                                        contentColor = Color.White
+//                                    )
+//                                ) {
+//                                    Text("Upload Laporan untuk Subtugas ini", fontSize = 12.sp)
+//                                }
 
                                 val statusColor = when (subtask.status) {
                                     "belum" -> Color.Red
@@ -343,9 +360,9 @@ fun TaskDetailScreen(
                                         Spacer(modifier = Modifier.height(4.dp))
 
                                         Row(
+                                            modifier = Modifier.fillMaxWidth(),
                                             horizontalArrangement = Arrangement.SpaceBetween,
-                                            verticalAlignment = Alignment.CenterVertically,
-                                            modifier = Modifier.fillMaxWidth()
+                                            verticalAlignment = Alignment.CenterVertically
                                         ) {
                                             Text(
                                                 subtask.status.uppercase(),
@@ -353,18 +370,23 @@ fun TaskDetailScreen(
                                                 fontSize = 11.sp,
                                                 fontWeight = FontWeight.Medium
                                             )
-                                            IconButton(
-                                                onClick = { showStatusDialog = true },
-                                                modifier = Modifier.size(22.dp)
-                                            ) {
-                                                Icon(
-                                                    Icons.Default.Edit,
-                                                    contentDescription = "Edit",
-                                                    tint = Color.Gray,
-                                                    modifier = Modifier.size(18.dp)
+
+                                            Button(
+                                                onClick = {
+                                                    selectedSubtaskId = subtask.id
+                                                    launcher.launch("application/pdf")
+                                                },
+                                                modifier = Modifier.height(32.dp),
+                                                shape = RoundedCornerShape(6.dp),
+                                                colors = ButtonDefaults.buttonColors(
+                                                    containerColor = GreenPrimary,
+                                                    contentColor = Color.White
                                                 )
+                                            ) {
+                                                Text("Upload", fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
                                             }
                                         }
+
                                     }
                                 }
 
@@ -376,18 +398,18 @@ fun TaskDetailScreen(
                         Spacer(Modifier.height(16.dp))
 
                         // 🔹 Tombol Upload Laporan
-                        Button(
-                            onClick = { launcher.launch("application/pdf") },
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(10.dp),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = GreenPrimary, // 💚 Warna tombol
-                                contentColor = Color.White      // 🏷 Warna teks di atas tombol
-                            )
-
-                        ) {
-                            Text("Upload Laporan")
-                        }
+//                        Button(
+//                            onClick = { launcher.launch("application/pdf") },
+//                            modifier = Modifier.fillMaxWidth(),
+//                            shape = RoundedCornerShape(10.dp),
+//                            colors = ButtonDefaults.buttonColors(
+//                                containerColor = GreenPrimary, // 💚 Warna tombol
+//                                contentColor = Color.White      // 🏷 Warna teks di atas tombol
+//                            )
+//
+//                        ) {
+//                            Text("Upload Laporan")
+//                        }
 
                     }
                 }
@@ -436,13 +458,15 @@ fun TaskDetailScreen(
                             onClick = {
                                 coroutineScope.launch {
                                     val token = userPrefs.getToken()
-                                    if (token != null && selectedFileUri != null && !isUploading) {
-                                        viewModel.uploadProgressReport(token, taskId, selectedFileUri!!, context)
+                                    if (token != null && selectedSubtaskId != null && selectedFileUri != null && !isUploading) {
+                                        viewModel.uploadProgressReport(token, selectedSubtaskId!!, selectedFileUri!!, context)
                                         showUploadDialog = false
+                                        selectedSubtaskId = null
                                     }
                                 }
                             },
-                            enabled = !isUploading
+
+                                    enabled = !isUploading
                         ) {
                             if (isUploading) {
                                 CircularProgressIndicator(

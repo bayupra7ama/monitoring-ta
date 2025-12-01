@@ -90,13 +90,13 @@ interface AuthApiService {
         @Header("Authorization") token: String
     ): Call<ResponseWrapper<SubTask>>
 
-    @Multipart
-    @POST("api/tasks/{taskId}/reports")
-    suspend fun uploadProgressReport(
-        @Path("taskId") taskId: Int,
-        @Part file: MultipartBody.Part,
-        @Header("Authorization") token: String
-    ): Response<ResponseWrapper<ProgressReport>>
+//    @Multipart
+//    @POST("api/tasks/{taskId}/reports")
+//    suspend fun uploadProgressReport(
+//        @Path("taskId") taskId: Int,
+//        @Part file: MultipartBody.Part,
+//        @Header("Authorization") token: String
+//    ): Response<ResponseWrapper<ProgressReport>>
 
     @GET("api/my-reports")
     suspend fun getMyReports(
@@ -170,6 +170,14 @@ interface AuthApiService {
         @Body body: Map<String, String>
     ): Response<ResponseWrapper<ReportDetail>>
 
-    
+    @Multipart
+    @POST("api/subtasks/{subtaskId}/upload-report")
+    suspend fun uploadProgressReport(
+        @Path("subtaskId") subtaskId: Int,
+        @Part file: MultipartBody.Part,   // <- di sini juga 'file'
+        @Header("Authorization") token: String
+    ): Response<ResponseWrapper<ProgressReport>>
+
+
 }
 

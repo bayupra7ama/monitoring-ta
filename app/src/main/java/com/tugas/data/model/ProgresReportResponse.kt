@@ -52,7 +52,7 @@ data class ReportDetail(
     val statusValidasi: String,
     val feedback: String?,
     val user: User,
-    val task: Task,
+    val subtask: SubTask, // 🔥 bukan task lagi
     @SerializedName("file_url")
     val fileUrl: String
 )

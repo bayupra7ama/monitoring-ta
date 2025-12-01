@@ -203,19 +203,20 @@ fun ReportCardItem(report: MyReportResponse, navController: NavController) {
         Box(modifier = Modifier.padding(16.dp)) {
             Column {
                 // BAGIAN HEADER: Judul
+                // HEADER – judul = nama subtask
                 Text(
-                    text = report.task?.title ?: "Tugas Tidak Bernama",
+                    text = report.subtask?.title ?: "Subtugas Tidak Bernama",
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
                     color = GrayDark,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.padding(end = 40.dp) // Beri ruang untuk ikon panah
+                    modifier = Modifier.padding(end = 40.dp)
                 )
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                // BAGIAN BODY: Ringkasan subtugas
+// BODY – info singkat, misal status subtask
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ListAlt,
@@ -225,11 +226,12 @@ fun ReportCardItem(report: MyReportResponse, navController: NavController) {
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "${report.task?.subtasks?.size ?: 0} Subtugas",
+                        text = "Status subtugas: ${report.subtask?.status ?: "-"}",
                         fontSize = 14.sp,
                         color = GraySecondary
                     )
                 }
+
 
                 Spacer(modifier = Modifier.height(16.dp))
 
@@ -283,7 +285,7 @@ fun ReportCardItem(report: MyReportResponse, navController: NavController) {
 @Composable
 private fun StatusChip(status: String) {
     val (icon, color, text) = when (status.lowercase()) {
-        "disetujui" -> Triple(Icons.Default.CheckCircle, GreenPrimary, "Disetujui")
+        "selesai" -> Triple(Icons.Default.CheckCircle, GreenPrimary, "Disetujui")
         "pending" -> Triple(Icons.Default.Pending, Color(0xFFFFA000), "Pending")
         "ditolak" -> Triple(Icons.Default.Cancel, Color.Red, "Ditolak")
         else -> Triple(Icons.Default.Info, GraySecondary, "Tidak Diketahui")

@@ -135,7 +135,12 @@ class TaskViewModel : ViewModel() {
     }
 
 
-    suspend fun uploadProgressReport(token: String, taskId: Int, uri: Uri, context: Context) {
+    suspend fun uploadProgressReport(
+        token: String,
+        subtaskId: Int,
+        uri: Uri,
+        context: Context
+    ) {
         if (_isUploading.value) return
         _isUploading.value = true
 
@@ -147,22 +152,36 @@ class TaskViewModel : ViewModel() {
             }
 
             val requestFile = tempFile.asRequestBody("application/pdf".toMediaTypeOrNull())
-            val body = MultipartBody.Part.createFormData("file", tempFile.name, requestFile)
 
-            // ✅ langsung call API (karena sudah suspend)
-            val response = RetrofitInstance.api.uploadProgressReport(taskId, body, "Bearer $token")
+            // 🔁 GANTI 'laporan' -> 'file' (HARUS SAMA DENGAN Laravel)
+            val body = MultipartBody.Part.createFormData(
+                "file",           // <- ini yang penting
+                tempFile.name,
+                requestFile
+            )
+
+            val response = RetrofitInstance.api.uploadProgressReport(
+                subtaskId,
+                body,
+                "Bearer $token"
+            )
 
             _isUploading.value = false
             if (response.isSuccessful) {
                 Toast.makeText(context, "Upload sukses", Toast.LENGTH_SHORT).show()
             } else {
-                Toast.makeText(context, "Upload gagal: ${response.errorBody()?.string()}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    context,
+                    "Upload gagal: ${response.errorBody()?.string()}",
+                    Toast.LENGTH_SHORT
+                ).show()
             }
         } catch (e: Exception) {
             _isUploading.value = false
             Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
         }
     }
+
 
 
 
