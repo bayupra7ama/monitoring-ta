@@ -130,20 +130,24 @@ fun DosenProgressReportScreen(
                             contentPadding = PaddingValues(top = 16.dp, bottom = 16.dp) // Tambahkan padding bawah
                         ) {
                             items(reports) { report ->
-                                // Pastikan Anda menambahkan @RequiresApi(Build.VERSION_CODES.O) di atas fungsi yang memanggil ini
+                                val subtaskTitle = report.subtask?.title ?: "Subtugas Tanpa Judul"
+
                                 ReportCardDosenItem(
                                     reportId = report.id,
                                     studentName = report.user.name,
-                                    taskTitle = report.task.title,
-                                    status = report.status_validasi,
-                                    // 1. Tambahkan parameter baru untuk waktu upload
-                                    uploadTimestamp = report.created_at, // Asumsi nama propertinya 'createdAt', sesuaikan jika beda
+                                    taskTitle = subtaskTitle,         // ⬅️ pakai judul subtask
+                                    status = report.status_validasi,   // ⬅️ kalau di data class sudah pakai statusValidasi
+                                    uploadTimestamp = report.created_at,
                                     navController = navController
-                                    // 2. Parameter 'feedback' dan 'fileUrl' sudah tidak dipakai lagi di sini
                                 )
                                 Spacer(modifier = Modifier.height(16.dp))
                             }
+
+
+
                         }
+
+
                     }
                 }
             }
@@ -245,10 +249,11 @@ fun ReportCardDosenItem(
 @Composable
 private fun StatusChip(status: String) {
     val (icon, color, text) = when (status.lowercase()) {
-        "disetujui" -> Triple(Icons.Default.CheckCircle, GreenPrimary, "Disetujui")
-        "pending" -> Triple(Icons.Default.Pending, Color(0xFFFFA000), "Pending")
-        "ditolak" -> Triple(Icons.Default.Cancel, Color.Red, "Ditolak")
-        else -> Triple(Icons.Default.Info, GraySecondary, "Tidak Diketahui")
+        "selesai" -> Triple(Icons.Default.CheckCircle, GreenPrimary, "Selesai")
+        "revisi"  -> Triple(Icons.Default.Pending, Color(0xFFFFA000), "Revisi")
+        "belum"   -> Triple(Icons.Default.Info, GraySecondary, "Belum Dinilai")
+        "pending"   -> Triple(Icons.Default.Info, GraySecondary, "Belum Dinilai")
+        else      -> Triple(Icons.Default.Info, GraySecondary, "Tidak Diketahui")
     }
 
     Row(

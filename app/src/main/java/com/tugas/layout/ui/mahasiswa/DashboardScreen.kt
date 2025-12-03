@@ -329,9 +329,17 @@ fun BurndownChart(
             val plannedEntries = idealValues.mapIndexed { index, value ->
                 Entry(index.toFloat(), value.toFloat())
             }
-            val actualEntries = actualValues.mapIndexed { index, value ->
+
+            // Tambahkan titik 0 di akhir agar garis turun sampai 0
+            val adjustedActualValues = actualValues.toMutableList()
+//            if (adjustedActualValues.last() != 0) {
+//                adjustedActualValues.add(0)
+//            }
+
+            val actualEntries = adjustedActualValues.mapIndexed { index, value ->
                 Entry(index.toFloat(), value.toFloat())
             }
+
 
             val plannedDataSet = LineDataSet(plannedEntries, "Tugas yang Direncanakan").apply {
                 color = ChartPlanned.toArgb()
@@ -374,14 +382,16 @@ fun BurndownChart(
 
                 axisRight.isEnabled = false
 
+
+
+
                 xAxis.apply {
                     valueFormatter = IndexAxisValueFormatter(labels)
                     position = XAxis.XAxisPosition.BOTTOM
                     granularity = 1f
                     isGranularityEnabled = true
                     axisMinimum = 0f
-                    axisMaximum = actualValues.size.toFloat() - 1.0f
-                    setCenterAxisLabels(false)
+                    axisMaximum = (labels.size-1).toFloat()   // X tidak melebihi label
                     setDrawGridLines(true)
                     gridColor = Color(0xFFE0E0E0).toArgb()
                     textSize = 10f
@@ -391,13 +401,11 @@ fun BurndownChart(
                 axisLeft.apply {
                     textSize = 10f
                     axisMinimum = 0f
-                    setDrawGridLines(true)
-                    gridColor = Color(0xFFE0E0E0).toArgb()
                     granularity = 1f
                     isGranularityEnabled = true
-//                    axisMaximum = (maxDataValue * 1.2f).coerceAtLeast((maxDataValue + 1).toFloat())
-                    axisMaximum = maxDataValue.toFloat()
-
+                    axisMaximum = maxDataValue.toFloat()        // Y tidak melebihi data
+                    setDrawGridLines(true)
+                    gridColor = Color(0xFFE0E0E0).toArgb()
                     textColor = GrayDark.toArgb()
                 }
 

@@ -13,9 +13,18 @@ data class ProgressReportResponse(
     val created_at: String,
     val updated_at: String,
     val user: UserProfile,
-    val task: TaskOnly
+    val task: TaskOnly,
+    val subtask: SubtaskWithTask?   // ⬅️ ganti dari 'task: TaskOnly'
+
 )
 
+data class SubtaskWithTask(
+    val id: Int,
+    val task_id: Int,
+    val title: String,
+    val status: String,
+    val task: TaskOnly?             // ⬅️ task di dalam subtask
+)
 
 data class ValidateReportRequest(
     val status_validasi: String,
