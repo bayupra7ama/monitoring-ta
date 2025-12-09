@@ -1,5 +1,6 @@
 package com.tugas.route
 
+import android.annotation.SuppressLint
 import com.tugas.layout.ui.auth.RegisterScreen
 import android.net.Uri
 import android.os.Build
@@ -38,6 +39,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.tugas.data.repository.ProjectRepository
 import com.tugas.data.repository.UserPreferences
 import com.tugas.layout.ui.dosen.NotificationScreen
 import com.tugas.layout.ui.mahasiswa.AddTaskScreen
@@ -57,6 +59,7 @@ import com.tugas.viewmodel.UserViewModel
 import kotlinx.coroutines.launch
 
 
+@SuppressLint("CoroutineCreationDuringComposition")
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun MainApp() {
@@ -144,22 +147,37 @@ fun MainApp() {
             }
 
             composable(AppRoute.LOGIN) {
+                val scope = rememberCoroutineScope()   // <-- pindah ke sini
+                val projectRepo = ProjectRepository()
+
                 LoginScreen(
                     onLoginClick = { token, user ->
-                        navController.navigate(
-                            when (user.role) {
-                                "mahasiswa" -> AppRoute.HOME
-                                "dosen" -> AppRoute.DOSENHOME
-                                else -> AppRoute.LOGIN
+
+                        scope.launch {
+                            val projects = projectRepo.getProjects(token)
+
+                            if (user.role == "mahasiswa") {
+                                if (projects.data.isEmpty()) {
+                                    navController.navigate(AppRoute.ADD_PROJECT) {
+                                        popUpTo(AppRoute.LOGIN) { inclusive = true }
+                                    }
+                                } else {
+                                    val projectId = projects.data[0].id
+                                    navController.navigate("projects/$projectId") {
+                                        popUpTo(AppRoute.LOGIN) { inclusive = true }
+                                    }
+                                }
+                            } else {
+                                navController.navigate(AppRoute.DOSENHOME) {
+                                    popUpTo(AppRoute.LOGIN) { inclusive = true }
+                                }
                             }
-                        ) {
-                            popUpTo(AppRoute.LOGIN) { inclusive = true }
-                            launchSingleTop = true
                         }
                     },
                     onRegisterNavigate = { navController.navigate(AppRoute.REGISTER) }
                 )
             }
+
 
             composable(AppRoute.REGISTER) {
                 RegisterScreen(
@@ -185,13 +203,33 @@ fun MainApp() {
 
             // Mahasiswa Routes
             composable(AppRoute.HOME) {
+                val context = LocalContext.current
+                val prefs = remember { UserPreferences(context) }
+                val scope = rememberCoroutineScope()
+                val projectRepo = ProjectRepository()
+
+                LaunchedEffect(Unit) {
+                    val token = prefs.getToken()
+                    if (token != null) {
+                        val projects = projectRepo.getProjects(token)
+                        if (projects.data.isNotEmpty()) {
+                            val projectId = projects.data[0].id
+                            navController.navigate("projects/$projectId") {
+                                popUpTo(AppRoute.HOME) { inclusive = true }
+                            }
+                            return@LaunchedEffect
+                        }
+                    }
+                }
+
+                // tampilkan ProjectListScreen HANYA ketika belum ada project
                 ProjectListScreen(
                     onProjectClick = { navController.navigate("projects/${it.id}") },
                     onAddProjectClick = { navController.navigate(AppRoute.ADD_PROJECT) },
-                     onNavigateToNotifications = {navController.navigate("notifications")
-                     }
+                    onNavigateToNotifications = { navController.navigate("notifications") }
                 )
             }
+
 
             composable("progress") {
                 ProgressReportScreen(

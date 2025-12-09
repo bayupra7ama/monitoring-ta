@@ -19,6 +19,11 @@ class ProjectRepository {
         suspend fun createProject(token: String, request: AddProjectRequest):   Project {
         return RetrofitInstance.api.addProject("Bearer $token", request).data
     }
+    suspend fun getMyProjects(token: String): ProjectListResponse {
+        return RetrofitInstance.api.getProjects("Bearer $token")
+    }
+
+
 
     suspend fun validateReport(
         token: String,

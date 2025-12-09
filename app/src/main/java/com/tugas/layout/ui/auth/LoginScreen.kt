@@ -51,7 +51,7 @@ val LoginGradientEndColor = Color(0xFF000000)   // Menggunakan hitam untuk efek 
 @Composable
 fun LoginScreen(
     onLoginClick: (token: String, user: UserData) -> Unit = { _, _ -> },
-    onRegisterNavigate: () -> Unit = {},
+    onRegisterNavigate: () -> Unit = {}
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
