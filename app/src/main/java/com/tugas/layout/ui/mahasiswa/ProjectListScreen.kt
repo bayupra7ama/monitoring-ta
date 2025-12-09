@@ -52,6 +52,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import com.tugas.data.api.RetrofitInstance
 import com.tugas.data.model.Project
 import com.tugas.data.repository.NotificationRepository
@@ -70,7 +71,8 @@ import kotlinx.coroutines.launch
 fun ProjectListScreen(
     onProjectClick: (Project) -> Unit,
     onAddProjectClick: () -> Unit,
-    onNavigateToNotifications: () -> Unit
+    onNavigateToNotifications: () -> Unit,
+    navController: NavController
 ) {
     val context = LocalContext.current
     val projectViewModel: ProjectViewModel = viewModel()
@@ -164,11 +166,18 @@ fun ProjectListScreen(
             )
         },
         floatingActionButton = {
-            FloatingActionButton(
-                onClick = onAddProjectClick,
-                containerColor = GreenPrimary
-            ) {
-                Icon(Icons.Default.Add, contentDescription = "Tambah Project", tint = Color.White)
+            // ✅ TAMPILKAN FAB HANYA KALAU BELUM ADA PROJECT
+            if (projects.isEmpty() && !isLoading) {
+                FloatingActionButton(
+                    onClick = onAddProjectClick,
+                    containerColor = GreenPrimary
+                ) {
+                    Icon(
+                        Icons.Default.Add,
+                        contentDescription = "Tambah Project",
+                        tint = Color.White
+                    )
+                }
             }
         }
     ) { innerPadding ->

@@ -19,6 +19,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -81,7 +82,9 @@ fun DashboardScreen(
     projectId: Int,
     onTaskClick: (Int) -> Unit = {},
     onAddTaskClick: () -> Unit = {},
-    onNavigateToNotifications: () -> Unit
+    onNavigateToNotifications: () -> Unit,
+    onEditProjectClick: (Int) -> Unit,     // ✅ tambah ini
+
 ) {
     val context = LocalContext.current
     val viewModel: ProjectDetailViewModel = viewModel()
@@ -184,8 +187,33 @@ fun DashboardScreen(
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp) // Padding horizontal untuk konten tetap
                 ) {
-                    Text(project.title, fontSize = 22.sp, fontWeight = FontWeight.Bold, color = GrayDark)
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            project.title,
+                            fontSize = 22.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = GrayDark,
+                            modifier = Modifier.weight(1f)
+                        )
+
+                        IconButton(
+                            onClick = { onEditProjectClick(project.id) } // ✅ kita tambahin callback baru
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Edit,
+                                contentDescription = "Edit project",
+                                tint = GreenPrimary
+                            )
+                        }
+                    }
+
                     Text(project.description, fontSize = 14.sp, color = GraySecondary)
+
+//                    Text(project.description, fontSize = 14.sp, color = GraySecondary)
 
                     Spacer(modifier = Modifier.height(16.dp))
 
@@ -266,6 +294,7 @@ fun DashboardScreen(
                 }
             }
         }
+
     }
 }
 

@@ -1,5 +1,6 @@
 package com.tugas.route
 
+import EditProjectScreen
 import android.annotation.SuppressLint
 import com.tugas.layout.ui.auth.RegisterScreen
 import android.net.Uri
@@ -147,12 +148,11 @@ fun MainApp() {
             }
 
             composable(AppRoute.LOGIN) {
-                val scope = rememberCoroutineScope()   // <-- pindah ke sini
+                val scope = rememberCoroutineScope()
                 val projectRepo = ProjectRepository()
 
                 LoginScreen(
                     onLoginClick = { token, user ->
-
                         scope.launch {
                             val projects = projectRepo.getProjects(token)
 
@@ -177,6 +177,7 @@ fun MainApp() {
                     onRegisterNavigate = { navController.navigate(AppRoute.REGISTER) }
                 )
             }
+
 
 
             composable(AppRoute.REGISTER) {
@@ -209,26 +210,31 @@ fun MainApp() {
                 val projectRepo = ProjectRepository()
 
                 LaunchedEffect(Unit) {
-                    val token = prefs.getToken()
-                    if (token != null) {
-                        val projects = projectRepo.getProjects(token)
-                        if (projects.data.isNotEmpty()) {
+                    scope.launch {
+                        val token = prefs.getToken()
+                        val projects = projectRepo.getProjects(token!!)
+
+                        if (projects.data.isEmpty()) {
+                            // belum punya project → tampilkan project list screen
+                        } else {
                             val projectId = projects.data[0].id
                             navController.navigate("projects/$projectId") {
                                 popUpTo(AppRoute.HOME) { inclusive = true }
                             }
-                            return@LaunchedEffect
+                            return@launch
                         }
                     }
                 }
 
-                // tampilkan ProjectListScreen HANYA ketika belum ada project
+                // tampilkan ProjectListScreen hanya jika belum punya project
                 ProjectListScreen(
                     onProjectClick = { navController.navigate("projects/${it.id}") },
                     onAddProjectClick = { navController.navigate(AppRoute.ADD_PROJECT) },
-                    onNavigateToNotifications = { navController.navigate("notifications") }
+                    onNavigateToNotifications = { navController.navigate("notifications") },
+                    navController = navController
                 )
             }
+
 
 
             composable("progress") {
@@ -309,10 +315,15 @@ fun MainApp() {
                         },
                         onNavigateToNotifications = {
                             navController.navigate("notifications")
-                        })
+                        },
+                         onEditProjectClick = { id ->
+                        navController.navigate("edit_project/$id")
+                         } )  // ✅ pergi ke screen edit
+                    }
+
                 }
 
-            }
+
 
             composable("add_task/{projectId}") { backStackEntry ->
                 val projectId = backStackEntry.arguments?.getString("projectId")?.toIntOrNull()
@@ -381,6 +392,15 @@ fun MainApp() {
             }
 
 
+            composable("edit_project/{projectId}") { backStackEntry ->
+                val projectId = backStackEntry.arguments?.getString("projectId")?.toIntOrNull()
+                if (projectId != null) {
+                    EditProjectScreen(
+                        navController = navController,
+                        projectId = projectId
+                    )
+                }
+            }
 
 
 

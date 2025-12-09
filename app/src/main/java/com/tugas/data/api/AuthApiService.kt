@@ -179,5 +179,12 @@ interface AuthApiService {
     ): Response<ResponseWrapper<ProgressReport>>
 
 
+    @PUT("api/projects/{id}")
+    suspend fun updateProject(
+        @Header("Authorization") authHeader: String,
+        @Path("id") id: Int,
+        @Body request: AddProjectRequest
+    ): ResponseWrapper<Project>
+
 }
 

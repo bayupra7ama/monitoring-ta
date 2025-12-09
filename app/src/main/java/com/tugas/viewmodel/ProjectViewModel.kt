@@ -57,4 +57,23 @@ class ProjectViewModel : ViewModel() {
             }
         }
     }
+
+    private val _updateResult = MutableStateFlow<Project?>(null)
+    val updateResult: StateFlow<Project?> = _updateResult
+
+    fun updateProject(token: String, projectId: Int, request: AddProjectRequest) {
+        viewModelScope.launch {
+            try {
+                _isLoading.value = true
+                val updated = repository.updateProject(token, projectId, request)
+                _updateResult.value = updated
+                _errorMessage.value = null
+            } catch (e: Exception) {
+                _errorMessage.value = e.message ?: "Gagal mengupdate project"
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+
 }

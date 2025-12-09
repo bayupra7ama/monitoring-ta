@@ -40,6 +40,15 @@ class ProjectRepository {
         )
     }
 
+    suspend fun updateProject(
+        token: String,
+        projectId: Int,
+        request: AddProjectRequest
+    ): Project {
+        return RetrofitInstance.api.updateProject("Bearer $token", projectId, request).data
+    }
+
+
 
 
 }
